@@ -1,31 +1,32 @@
 import json
-import urllib.request
+import urllib3
 import boto3
+import time
+import os
+from decimal import Decimal
 
+http = urllib3.PoolManager()
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('weatherdata')
+table = dynamodb.Table('new-weatherdata-table')
 
-
-API_KEY = "1803e3577ab987710efc114c1d73b224"
-CITY = "Kochi"
+API_KEY = os.environ['API_KEY']
+CITIES = ["Kochi", "Mumbai", "Delhi", "Bangalore", "Chennai"] 
 
 def lambda_handler(event, context):
-    url = f"https://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={API_KEY}&units=metric"
+    for city in CITIES:
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
+        response = http.request('GET', url)
+        data = json.loads(response.data.decode('utf-8'))
 
-    with urllib.request.urlopen(url) as response:
-        data = json.loads(response.read().decode("utf-8"))
+        item = {
+            'city': city,
+            'timestamp': int(time.time()),
+            'temperature': Decimal(str(data['main']['temp'])),
+            'humidity': Decimal(str(data['main']['humidity'])),
+            'weather': data['weather'][0]['description'],
+            'raw_data': json.dumps(data)
+        }
 
-    item = {
-        "id": CITY,
-        "temperature": str(data["main"]["temp"]),
-        "humidity": str(data["main"]["humidity"]),
-        "weather": data["weather"][0]["main"]
-    }
-
-    table.put_item(Item=item)
-
-    return {
-        "statusCode": 200,
-        "body": json.dumps("Weather data saved successfully")
-    }
+        table.put_item(Item=item)
     
+    return {'statusCode': 200, 'body': f'Data inserted for {len(CITIES)} cities'}
