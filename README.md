@@ -232,3 +232,24 @@ This project helps in understanding:
 - Cloud-native ETL pipelines
 
 ---
+## 📊 Power BI Dashboard
+The Power BI dashboard provides a visual overview of weather data collected through the weather data pipeline.
+
+### Dashboard Features
+
+- Average Temperature
+- Maximum Temperature
+- Average Humidity
+- Most Common Weather Condition
+- Temperature Trend Over Time
+- Humidity Trend Over Time
+- Temperature by City
+- Humidity by City
+- Weather Conditions
+- City-wise filtering
+
+### Dashboard File
+
+The Power BI dashboard is available here:
+
+[Download Power BI Dashboard](./powerBI/newdashboard.pbix)
